@@ -22,21 +22,9 @@
 
         // Próba wymuszenia callbacku, który widzieliśmy we Fridzie
         setTimeout(function() {
-            try {
-                if (window.HeytapJsApi) {
-                    log("Znaleziono HeytapJsApi! Próbuję pobrać dane...");
-                    
-                    // Rejestrujemy się na callback, który widzieliśmy w logach
-                    window.HeytapJsApi.callback = function(id, response) {
-                        log("SUKCES! Przechwycono: " + JSON.stringify(response));
-                    };
-                } else {
-                    log("Nie znaleziono mostka JS. Spróbuj odświeżyć lub sprawdź Intent.");
-                }
-            } catch (e) {
-                log("Błąd: " + e.message);
-            }
-        }, 2000);
+    var keys = Object.keys(window).filter(k => k.toLowerCase().includes('heytap') || k.toLowerCase().includes('realme') || k.toLowerCase().includes('jsapi'));
+    log("Znalezione obiekty: " + keys.join(", "));
+}, 1000);
     </script>
 </body>
 </html>
